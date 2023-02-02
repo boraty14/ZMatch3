@@ -10,6 +10,7 @@ public class MatchObject : MonoBehaviour
     public void Initialize(MatchObjectType matchObjectType)
     {
         _matchObjectType = matchObjectType;
+        _spriteRenderer.sprite = MatchObjectSpriteData.Instance.GetSprite(_matchObjectType);
     }
 }
 

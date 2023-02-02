@@ -6,11 +6,7 @@ using UnityEngine;
 public class InputHandler : MonoBehaviour
 {
     [SerializeField] private Camera _camera;
-
-    private void Start()
-    {
-        //Debug.Log(0.63f % 0.08f);
-    }
+    
 
     private void Update()
     {

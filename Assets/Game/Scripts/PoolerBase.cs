@@ -19,7 +19,7 @@ public abstract class PoolerBase<T> : MonoBehaviour where T : MonoBehaviour
         set => _pool = value;
     }
 
-    protected void InitPool(T prefab, int initial = 10, int max = 20, bool collectionChecks = false) {
+    protected void InitPool(T prefab, int initial = 10, int max = 100, bool collectionChecks = false) {
         _prefab = prefab;
         Pool = new ObjectPool<T>(
             CreateSetup,
@@ -39,7 +39,7 @@ public abstract class PoolerBase<T> : MonoBehaviour where T : MonoBehaviour
     #endregion
 
     #region Getters
-    public T Get() => Pool.Get();
+    public T GetItemFromPool() => Pool.Get();
     public void Release(T obj) => Pool.Release(obj);
     #endregion
 }

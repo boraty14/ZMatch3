@@ -7,7 +7,8 @@ public static class GridBoard
     private const float GridCellIndexSize = GridCellSize + GridCellInterval;
     private const float GridStartingPointX = -3.69f;
     private const float GridStartingPointY = -6f;
-    private const int GridSize = 8;
+    private const float GridSpriteVerticalOffset = -0.05f;
+    public const int GridSize = 8;
 
     public static GridCoordinates GetGridCoordinatesFromWorldPoint(Vector3 worldPoint)
     {
@@ -28,7 +29,16 @@ public static class GridBoard
         var yOffset = worldPoint.y - GridStartingPointY;
         if (xOffset < 0f || yOffset < 0f) return false;
         if (xOffset / GridCellIndexSize > GridSize || yOffset / GridCellIndexSize > GridSize) return false;
+        if (xOffset % GridCellIndexSize > GridCellSize || yOffset % GridCellIndexSize > GridCellSize) return false;
 
         return true;
+    }
+
+    public static Vector3 GetWorldPositionFromGridCoordinates(GridCoordinates gridCoordinates)
+    {
+        var xPosition = (GridCellIndexSize * gridCoordinates.X + GridCellSize / 2f) + GridStartingPointX;
+        var yPosition = (GridCellIndexSize * gridCoordinates.Y + GridCellSize / 2f) + GridStartingPointY +
+                        GridSpriteVerticalOffset;
+        return new Vector3(xPosition, yPosition, 0f);
     }
 }
