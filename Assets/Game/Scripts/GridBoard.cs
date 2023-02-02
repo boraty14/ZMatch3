@@ -9,6 +9,7 @@ public static class GridBoard
     private const float GridStartingPointY = -6f;
     private const float GridSpriteVerticalOffset = -0.05f;
     public const int GridSize = 8;
+    public static readonly MatchObject[,] MatchObjectsArray = new MatchObject[GridSize, GridSize];
 
     public static GridCoordinates GetGridCoordinatesFromWorldPoint(Vector3 worldPoint)
     {
@@ -25,6 +26,7 @@ public static class GridBoard
 
     public static bool IsTouchingGrid(Vector3 worldPoint)
     {
+        
         var xOffset = worldPoint.x - GridStartingPointX;
         var yOffset = worldPoint.y - GridStartingPointY;
         if (xOffset < 0f || yOffset < 0f) return false;
@@ -40,5 +42,12 @@ public static class GridBoard
         var yPosition = (GridCellIndexSize * gridCoordinates.Y + GridCellSize / 2f) + GridStartingPointY +
                         GridSpriteVerticalOffset;
         return new Vector3(xPosition, yPosition, 0f);
+    }
+    
+    public static void SwapMatchObjects(ref MatchObject firstMatchObject, ref MatchObject secondMatchObject)
+    {
+        firstMatchObject.PlaySwapAnimation(secondMatchObject.transform.position);
+        secondMatchObject.PlaySwapAnimation(firstMatchObject.transform.position);
+        (firstMatchObject, secondMatchObject) = (secondMatchObject, firstMatchObject);
     }
 }

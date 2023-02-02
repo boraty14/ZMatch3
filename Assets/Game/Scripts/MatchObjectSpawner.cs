@@ -3,7 +3,6 @@ using UnityEngine;
 public class MatchObjectSpawner : PoolerBase<MatchObject>
 {
     [SerializeField] private MatchObject _matchObjectPrefab;
-    private readonly MatchObject[,] _matchObjectArray = new MatchObject[GridBoard.GridSize, GridBoard.GridSize];
 
     private void Start()
     {
@@ -19,7 +18,7 @@ public class MatchObjectSpawner : PoolerBase<MatchObject>
             {
                 var randomTypeIndex = Random.Range(0, 5);
                 var matchObject = GetItemFromPool();
-                _matchObjectArray[j, i] = matchObject;
+                GridBoard.MatchObjectsArray[j, i] = matchObject;
                 matchObject.Initialize((MatchObjectType)randomTypeIndex);
                 matchObject.transform.name = $"{j},{i}";
                 matchObject.transform.position =
