@@ -7,13 +7,18 @@ public class InputHandler : MonoBehaviour
 
     private void Update()
     {
+        var isJustPressed = Input.GetMouseButtonDown(0);
+        var isPressing = Input.GetMouseButton(0);
+        if(!isJustPressed && !isPressing) return;
+        
         var mousePos = Input.mousePosition;
         var worldPoint = _camera.ScreenToWorldPoint(mousePos);
         if(!GridBoard.IsTouchingGrid(worldPoint)) return;
         
         var gridCoordinates = GridBoard.GetGridCoordinatesFromWorldPoint(worldPoint);
         var pressedMatchObject = GridBoard.MatchObjectsArray[gridCoordinates.X, gridCoordinates.Y];
-        if (Input.GetMouseButtonDown(0))
+        
+        if (isJustPressed)
         {
             if (_firstMatchObject is null)
             {
@@ -24,14 +29,14 @@ public class InputHandler : MonoBehaviour
 
             if (_firstMatchObject == pressedMatchObject)
             {
-                _firstMatchObject.SetObjectSelectedState(false);
-                _firstMatchObject = null;
+                ReleaseFirstMatchObject();
                 return;
             }
             CheckSwap(_firstMatchObject,pressedMatchObject);
             return;
         }
-        if (Input.GetMouseButton(0))
+        
+        if (isPressing)
         {
             if(_firstMatchObject is null || _firstMatchObject == pressedMatchObject) return;
             CheckSwap(_firstMatchObject,pressedMatchObject);
@@ -42,12 +47,22 @@ public class InputHandler : MonoBehaviour
     {
         var firstGridCoordinates = GridBoard.GetGridCoordinatesFromMatchObject(firstMatchObject);
         var secondGridCoordinates = GridBoard.GetGridCoordinatesFromMatchObject(secondMatchObject);
-        if (GridCoordinates.GetTotalDistance(firstGridCoordinates, secondGridCoordinates) != 1) return;
+        if (GridCoordinates.GetTotalDistance(firstGridCoordinates, secondGridCoordinates) != 1)
+        {
+            ReleaseFirstMatchObject();
+            return;
+        }
         
         secondMatchObject.SetObjectSelectedState(true);
         GridBoard.SwapMatchObjects(firstMatchObject,secondMatchObject);
         _firstMatchObject = null;
         
+    }
+
+    private void ReleaseFirstMatchObject()
+    {
+        _firstMatchObject.SetObjectSelectedState(false);
+        _firstMatchObject = null;
     }
 
 
