@@ -32,7 +32,6 @@ public static class GridBoard
         if (xOffset < 0f || yOffset < 0f) return false;
         if (xOffset / GridCellIndexSize > GridSize || yOffset / GridCellIndexSize > GridSize) return false;
         if (xOffset % GridCellIndexSize > GridCellSize || yOffset % GridCellIndexSize > GridCellSize) return false;
-
         return true;
     }
 
@@ -44,10 +43,23 @@ public static class GridBoard
         return new Vector3(xPosition, yPosition, 0f);
     }
     
-    public static void SwapMatchObjects(ref MatchObject firstMatchObject, ref MatchObject secondMatchObject)
+    public static void SwapMatchObjects(MatchObject firstObject, MatchObject secondObject)
     {
-        firstMatchObject.PlaySwapAnimation(secondMatchObject.transform.position);
-        secondMatchObject.PlaySwapAnimation(firstMatchObject.transform.position);
-        (firstMatchObject, secondMatchObject) = (secondMatchObject, firstMatchObject);
+        var firstObjectPosition = firstObject.transform.position;
+        var secondObjectPosition = secondObject.transform.position;
+        firstObject.PlaySwapAnimation(secondObjectPosition);
+        secondObject.PlaySwapAnimation(firstObjectPosition);
+        var firstGridCoordinates = GetGridCoordinatesFromWorldPoint(firstObjectPosition);
+        var secondGridCoordinates = GetGridCoordinatesFromWorldPoint(secondObjectPosition);
+        SwapMatchObjectsInArray(firstGridCoordinates,secondGridCoordinates);
+    }
+
+    private static void SwapMatchObjectsInArray(GridCoordinates firstGridCoordinates,GridCoordinates secondGridCoordinates)
+    {
+        (MatchObjectsArray[firstGridCoordinates.X, firstGridCoordinates.Y],
+                MatchObjectsArray[secondGridCoordinates.X, secondGridCoordinates.Y]) =
+            (MatchObjectsArray[secondGridCoordinates.X, secondGridCoordinates.Y],
+                MatchObjectsArray[firstGridCoordinates.X, firstGridCoordinates.Y]);
+        
     }
 }
