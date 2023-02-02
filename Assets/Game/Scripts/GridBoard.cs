@@ -24,6 +24,12 @@ public static class GridBoard
         };
     }
 
+    public static GridCoordinates GetGridCoordinatesFromMatchObject(MatchObject matchObject)
+    {
+        var position = matchObject.transform.position;
+        return GetGridCoordinatesFromWorldPoint(position);
+    }
+
     public static bool IsTouchingGrid(Vector3 worldPoint)
     {
         
@@ -45,12 +51,10 @@ public static class GridBoard
     
     public static void SwapMatchObjects(MatchObject firstObject, MatchObject secondObject)
     {
-        var firstObjectPosition = firstObject.transform.position;
-        var secondObjectPosition = secondObject.transform.position;
-        firstObject.PlaySwapAnimation(secondObjectPosition);
-        secondObject.PlaySwapAnimation(firstObjectPosition);
-        var firstGridCoordinates = GetGridCoordinatesFromWorldPoint(firstObjectPosition);
-        var secondGridCoordinates = GetGridCoordinatesFromWorldPoint(secondObjectPosition);
+        firstObject.PlaySwapAnimation(secondObject.transform.position);
+        secondObject.PlaySwapAnimation(firstObject.transform.position);
+        var firstGridCoordinates = GetGridCoordinatesFromMatchObject(firstObject);
+        var secondGridCoordinates = GetGridCoordinatesFromMatchObject(secondObject);
         SwapMatchObjectsInArray(firstGridCoordinates,secondGridCoordinates);
     }
 
@@ -60,6 +64,5 @@ public static class GridBoard
                 MatchObjectsArray[secondGridCoordinates.X, secondGridCoordinates.Y]) =
             (MatchObjectsArray[secondGridCoordinates.X, secondGridCoordinates.Y],
                 MatchObjectsArray[firstGridCoordinates.X, firstGridCoordinates.Y]);
-        
     }
 }

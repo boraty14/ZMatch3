@@ -21,20 +21,31 @@ public class InputHandler : MonoBehaviour
                 _firstMatchObject.SetObjectSelectedState(true);
                 return;
             }
+
+            if (_firstMatchObject == pressedMatchObject)
+            {
+                _firstMatchObject.SetObjectSelectedState(false);
+                _firstMatchObject = null;
+                return;
+            }
             CheckSwap(_firstMatchObject,pressedMatchObject);
             return;
         }
         if (Input.GetMouseButton(0))
         {
+            if(_firstMatchObject is null || _firstMatchObject == pressedMatchObject) return;
             CheckSwap(_firstMatchObject,pressedMatchObject);
         }
     }
 
-    private void CheckSwap(MatchObject firstMatchObject,MatchObject lastPressedMatchObject)
+    private void CheckSwap(MatchObject firstMatchObject,MatchObject secondMatchObject)
     {
-        if(firstMatchObject is null || firstMatchObject == lastPressedMatchObject) return;
-        lastPressedMatchObject.SetObjectSelectedState(true);
-        GridBoard.SwapMatchObjects(firstMatchObject,lastPressedMatchObject);
+        var firstGridCoordinates = GridBoard.GetGridCoordinatesFromMatchObject(firstMatchObject);
+        var secondGridCoordinates = GridBoard.GetGridCoordinatesFromMatchObject(secondMatchObject);
+        if (GridCoordinates.GetTotalDistance(firstGridCoordinates, secondGridCoordinates) != 1) return;
+        
+        secondMatchObject.SetObjectSelectedState(true);
+        GridBoard.SwapMatchObjects(firstMatchObject,secondMatchObject);
         _firstMatchObject = null;
         
     }

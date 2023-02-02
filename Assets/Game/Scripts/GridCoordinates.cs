@@ -1,9 +1,15 @@
 using System;
+using UnityEngine;
 
 public struct GridCoordinates
 {
     public int X;
     public int Y;
+
+    public static int GetTotalDistance(GridCoordinates g1, GridCoordinates g2)
+    {
+        return Mathf.Abs(g1.X - g2.X) + Mathf.Abs(g1.Y - g2.Y);
+    }
     
     public bool Equals(GridCoordinates other)
     {
