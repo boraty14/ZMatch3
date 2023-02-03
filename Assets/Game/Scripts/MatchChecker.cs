@@ -1,69 +1,94 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class MatchChecker
 {
     private readonly GridBoard _gridBoard;
     private MatchObjectType _checkType;
+    private readonly List<GridCoordinates> _matchingCoordinatesList = new List<GridCoordinates>();
+    private static readonly Vector2Int[] VerticalAxisDirections = { Vector2Int.up, Vector2Int.down };
+    private static readonly Vector2Int[] HorizontalAxisDirections = { Vector2Int.left, Vector2Int.right };
     private const int MinimumMatchCount = 3;
-
-    private static readonly Vector2Int[] VerticalDirections = new Vector2Int[] { Vector2Int.up, Vector2Int.down };
-    private static readonly Vector2Int[] HorizontalDirections = new Vector2Int[] { Vector2Int.left, Vector2Int.right };
 
     public MatchChecker(GridBoard gridBoard)
     {
         _gridBoard = gridBoard;
     }
 
-    public void CheckMatches(GridCoordinates firstCoordinates, GridCoordinates secondCoordinates)
+    public bool IsThereAnyMatch(GridCoordinates firstCoordinates, GridCoordinates secondCoordinates)
     {
-        CheckMatchObject(firstCoordinates);
-        CheckMatchObject(secondCoordinates);
+        return IsObjectCreatingMatch(firstCoordinates) || IsObjectCreatingMatch(secondCoordinates);
     }
 
-    private void CheckMatchObject(GridCoordinates gridCoordinates)
+    private bool IsObjectCreatingMatch(GridCoordinates gridCoordinates)
     {
-        var matchObject = _gridBoard.MatchObjectsArray[gridCoordinates.X, gridCoordinates.Y];
+        var matchObject = _gridBoard.GetMatchObjectFromCoordinates(gridCoordinates);
         _checkType = matchObject.GetMatchObjectType();
-        var verticalMatchList =  GetDirectionMatchList(gridCoordinates,VerticalDirections);
-        var horizontalMatchList =  GetDirectionMatchList(gridCoordinates,HorizontalDirections);
-
-        var isVerticalMatch = verticalMatchList.Count >= MinimumMatchCount - 1;
-        var isHorizontalMatch = horizontalMatchList.Count >= MinimumMatchCount - 1;
-        
-        if(!isVerticalMatch && !isHorizontalMatch)  return;
-        
-        if (isVerticalMatch) BlastObjectsInDirection(verticalMatchList);
-        if (isHorizontalMatch) BlastObjectsInDirection(horizontalMatchList);
-        BlastSingleObject(gridCoordinates);
-
+        var isVerticalMatch = IsThereAnyMatchInAxis(gridCoordinates, VerticalAxisDirections);
+        var isHorizontalMatch = IsThereAnyMatchInAxis(gridCoordinates, HorizontalAxisDirections);
+        return isVerticalMatch || isHorizontalMatch;
     }
 
-    private List<GridCoordinates> GetDirectionMatchList(GridCoordinates gridCoordinates, IEnumerable<Vector2Int> directions)
+    private bool IsThereAnyMatchInAxis(GridCoordinates gridCoordinates, IEnumerable<Vector2Int> axisDirections)
     {
-        var matchCoordinatesList = new List<GridCoordinates>();
+        int matchCount = 0;
         var startingCoordinates = gridCoordinates;
-        foreach (var direction in directions)
+        foreach (var direction in axisDirections)
         {
             gridCoordinates = startingCoordinates;
             while (true)
             {
-                Debug.Log("before " + gridCoordinates);
                 gridCoordinates.ApplyDirection(direction);
-                Debug.Log("after " + gridCoordinates);
                 if (!IsObjectAtCoordinatesMatching(gridCoordinates)) break;
-                Debug.Log("added " + gridCoordinates);
-                matchCoordinatesList.Add(gridCoordinates);
+                matchCount++;
             }
         }
-        return matchCoordinatesList;
+        return matchCount >= MinimumMatchCount - 1;
+    }
+
+    public async void BlastMatchingObjects(GridCoordinates firstCoordinates, GridCoordinates secondCoordinates)
+    {
+        SetMatchesOfObject(firstCoordinates);
+        SetMatchesOfObject(secondCoordinates);
+        var blastTasks = new List<Task>();
+        foreach (var matchingCoordinates in _matchingCoordinatesList)
+        {
+            var matchingObject = _gridBoard.GetMatchObjectFromCoordinates(matchingCoordinates);
+            blastTasks.Add(matchingObject.Blast());
+        }
+        await Task.WhenAll(blastTasks);
+    }
+
+    private void SetMatchesOfObject(GridCoordinates gridCoordinates)
+    {
+        var matchObject = _gridBoard.GetMatchObjectFromCoordinates(gridCoordinates);
+        _checkType = matchObject.GetMatchObjectType();
+        SetMatchesInAxis(gridCoordinates, VerticalAxisDirections);
+        SetMatchesInAxis(gridCoordinates, HorizontalAxisDirections);
+        _matchingCoordinatesList.Add(gridCoordinates);
+    }
+
+    private void SetMatchesInAxis(GridCoordinates gridCoordinates, IEnumerable<Vector2Int> axisDirections)
+    {
+        var startingCoordinates = gridCoordinates;
+        foreach (var direction in axisDirections)
+        {
+            gridCoordinates = startingCoordinates;
+            while (true)
+            {
+                gridCoordinates.ApplyDirection(direction);
+                if (!IsObjectAtCoordinatesMatching(gridCoordinates)) break;
+                _matchingCoordinatesList.Add(gridCoordinates);
+            }
+        }
     }
 
     private bool IsObjectAtCoordinatesMatching(GridCoordinates gridCoordinates)
     {
         if (!IsIndexValid(gridCoordinates)) return false;
-        
-        var checkObject = _gridBoard.MatchObjectsArray[gridCoordinates.X, gridCoordinates.Y];
+
+        var checkObject = _gridBoard.GetMatchObjectFromCoordinates(gridCoordinates);
         return checkObject.IsType(_checkType);
     }
 
@@ -71,19 +96,5 @@ public class MatchChecker
     {
         return gridCoordinates.X >= 0 && gridCoordinates.X < GridBoard.GridSize &&
                gridCoordinates.Y >= 0 && gridCoordinates.Y < GridBoard.GridSize;
-    }
-
-    private void BlastObjectsInDirection(IEnumerable<GridCoordinates> gridCoordinatesList)
-    {
-        foreach (var gridCoordinates in gridCoordinatesList)
-        {
-            Debug.Log(11);
-            BlastSingleObject(gridCoordinates);
-        }
-    }
-
-    private void BlastSingleObject(GridCoordinates gridCoordinates)
-    {
-        EventBus.OnBlastObject?.Invoke(gridCoordinates);
     }
 }

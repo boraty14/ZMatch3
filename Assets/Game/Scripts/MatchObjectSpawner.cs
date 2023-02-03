@@ -14,6 +14,12 @@ public class MatchObjectSpawner : PoolerBase<MatchObject>
         InitializeMatchObjects();
     }
 
+    protected override void GetSetup(MatchObject obj)
+    {
+        base.GetSetup(obj);
+        obj.transform.localScale = Vector3.one;
+    }
+
     private void OnEnable()
     {
         EventBus.OnBlastObject += EventBus_OnBlastObject;
@@ -26,7 +32,7 @@ public class MatchObjectSpawner : PoolerBase<MatchObject>
 
     private void EventBus_OnBlastObject(GridCoordinates gridCoordinates)
     {
-        var blastObject = _gridBoard.MatchObjectsArray[gridCoordinates.X, gridCoordinates.Y];
+        var blastObject = _gridBoard.GetMatchObjectFromCoordinates(gridCoordinates);
         Release(blastObject);
     }
 

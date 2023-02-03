@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 
@@ -23,13 +24,13 @@ public class MatchObject : MonoBehaviour
         transform.localScale = Vector3.one * scaleFactor;
     }
 
-    public void PlaySwapAnimation(Vector3 swapTarget)
+    public async Task PlaySwapAnimation(Vector3 swapTarget)
     {
-        transform.DOMove(swapTarget, SwapAnimationDuration).SetEase(Ease.InSine).OnComplete(() =>
-        {
-            SetObjectSelectedState(false);
-        });
+        await transform.DOMove(swapTarget, SwapAnimationDuration).SetEase(Ease.InSine).AsyncWaitForCompletion();
+    }
+
+    public async Task Blast()
+    {
+        await transform.DOScale(Vector3.zero, 0.2f).AsyncWaitForCompletion();
     }
 }
-
-

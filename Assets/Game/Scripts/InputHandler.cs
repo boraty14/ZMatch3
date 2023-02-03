@@ -5,6 +5,7 @@ public class InputHandler : MonoBehaviour
     [SerializeField] private Camera _camera;
     private MatchObject _firstMatchObject;
     private GridBoard _gridBoard;
+    private bool _isSwapping;
 
     public void Initialize(GridBoard gridBoard)
     {
@@ -13,6 +14,8 @@ public class InputHandler : MonoBehaviour
 
     private void Update()
     {
+        if(_isSwapping) return;
+        
         var isJustPressed = Input.GetMouseButtonDown(0);
         var isPressing = Input.GetMouseButton(0);
         if(!isJustPressed && !isPressing) return;
@@ -22,7 +25,7 @@ public class InputHandler : MonoBehaviour
         if(!GridBoard.IsTouchingGrid(worldPoint)) return;
         
         var gridCoordinates = GridBoard.GetGridCoordinatesFromWorldPoint(worldPoint);
-        var pressedMatchObject = _gridBoard.MatchObjectsArray[gridCoordinates.X, gridCoordinates.Y];
+        var pressedMatchObject = _gridBoard.GetMatchObjectFromCoordinates(gridCoordinates);
         
         if (isJustPressed)
         {
@@ -58,13 +61,15 @@ public class InputHandler : MonoBehaviour
             ReleaseFirstMatchObject();
             return;
         }
+        secondMatchObject.SetObjectSelectedState(true);
         Swap(firstMatchObject,secondMatchObject);
     }
 
-    private void Swap(MatchObject firstMatchObject,MatchObject secondMatchObject)
+    private async void Swap(MatchObject firstMatchObject,MatchObject secondMatchObject)
     {
-        secondMatchObject.SetObjectSelectedState(true);
-        _gridBoard.SwapMatchObjects(firstMatchObject,secondMatchObject);
+        _isSwapping = true;
+        await _gridBoard.SwapMatchObjects(firstMatchObject,secondMatchObject);
+        _isSwapping = false;
         _firstMatchObject = null;
     }
 
@@ -73,7 +78,4 @@ public class InputHandler : MonoBehaviour
         _firstMatchObject.SetObjectSelectedState(false);
         _firstMatchObject = null;
     }
-
-
-
 }

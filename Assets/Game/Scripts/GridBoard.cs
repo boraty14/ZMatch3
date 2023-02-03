@@ -1,3 +1,6 @@
+using System;
+using System.Threading.Tasks;
+using DG.Tweening;
 using UnityEngine;
 
 public class GridBoard
@@ -9,12 +12,17 @@ public class GridBoard
     private const float GridStartingPointY = -6f;
     private const float GridSpriteVerticalOffset = -0.05f;
     public const int GridSize = 8;
-    private MatchChecker _matchChecker;
+    private readonly MatchChecker _matchChecker;
     public readonly MatchObject[,] MatchObjectsArray = new MatchObject[GridSize, GridSize];
 
     public GridBoard()
     {
         _matchChecker = new MatchChecker(this);
+    }
+
+    public MatchObject GetMatchObjectFromCoordinates(GridCoordinates gridCoordinates)
+    {
+        return MatchObjectsArray[gridCoordinates.X, gridCoordinates.Y];
     }
 
     public static GridCoordinates GetGridCoordinatesFromWorldPoint(Vector3 worldPoint)
@@ -38,7 +46,6 @@ public class GridBoard
 
     public static bool IsTouchingGrid(Vector3 worldPoint)
     {
-        
         var xOffset = worldPoint.x - GridStartingPointX;
         var yOffset = worldPoint.y - GridStartingPointY;
         if (xOffset < 0f || yOffset < 0f) return false;
@@ -55,14 +62,33 @@ public class GridBoard
         return new Vector3(xPosition, yPosition, 0f);
     }
     
-    public void SwapMatchObjects(MatchObject firstObject, MatchObject secondObject)
+    public async Task SwapMatchObjects(MatchObject firstObject, MatchObject secondObject)
     {
-        firstObject.PlaySwapAnimation(secondObject.transform.position);
-        secondObject.PlaySwapAnimation(firstObject.transform.position);
+        var swapTask = RunObjectSwapAnimationTask(firstObject, secondObject);
         var firstGridCoordinates = GetGridCoordinatesFromMatchObject(firstObject);
         var secondGridCoordinates = GetGridCoordinatesFromMatchObject(secondObject);
         SwapMatchObjectsInArray(firstGridCoordinates,secondGridCoordinates);
-        _matchChecker.CheckMatches(firstGridCoordinates,secondGridCoordinates);
+        await swapTask;
+        
+        if (_matchChecker.IsThereAnyMatch(firstGridCoordinates, secondGridCoordinates))
+        {
+            _matchChecker.BlastMatchingObjects(firstGridCoordinates,secondGridCoordinates);   
+            return;
+        }
+
+        await RunObjectSwapAnimationTask(firstObject, secondObject);
+        firstObject.SetObjectSelectedState(false);
+        secondObject.SetObjectSelectedState(false);
+        SwapMatchObjectsInArray(firstGridCoordinates,secondGridCoordinates);
+    }
+
+    private static async Task RunObjectSwapAnimationTask(MatchObject firstObject, MatchObject secondObject)
+    {
+        var firstObjectPosition = firstObject.transform.position;
+        var secondObjectPosition = secondObject.transform.position;
+        var firstSwapTask = firstObject.PlaySwapAnimation(secondObjectPosition);
+        var secondSwapTask = secondObject.PlaySwapAnimation(firstObjectPosition);
+        await Task.WhenAll(firstSwapTask, secondSwapTask);
     }
 
     private void SwapMatchObjectsInArray(GridCoordinates firstGridCoordinates,GridCoordinates secondGridCoordinates)
