@@ -1,0 +1,16 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class GameInitializer : MonoBehaviour
+{
+    [SerializeField] private InputHandler _inputHandler;
+    [SerializeField] private MatchObjectSpawner _matchObjectSpawner;
+    
+    private void Start()
+    {
+        var gridBoard = new GridBoard();
+        _inputHandler.Initialize(gridBoard);
+        _matchObjectSpawner.Initialize(gridBoard);
+    }
+}

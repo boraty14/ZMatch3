@@ -10,6 +10,12 @@ public struct GridCoordinates
     {
         return Mathf.Abs(g1.X - g2.X) + Mathf.Abs(g1.Y - g2.Y);
     }
+
+    public void ApplyDirection(Vector2Int direction)
+    {
+        this.X += direction.x;
+        this.Y += direction.y;
+    }
     
     public bool Equals(GridCoordinates other)
     {
@@ -25,7 +31,7 @@ public struct GridCoordinates
     {
         return HashCode.Combine(X, Y);
     }
-
+    
     public static bool operator ==(GridCoordinates g1, GridCoordinates g2)
     {
         return g1.X == g2.X && g1.Y == g2.Y;

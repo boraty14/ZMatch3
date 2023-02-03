@@ -4,10 +4,11 @@ using UnityEngine;
 public class MatchObject : MonoBehaviour
 {
     [SerializeField] private SpriteRenderer _spriteRenderer;
-    private MatchObjectType _matchObjectType;
+    public MatchObjectType _matchObjectType;
     private const float SelectedScaleFactor = 1.5f;
     private const float SwapAnimationDuration = 0.2f;
 
+    public MatchObjectType GetMatchObjectType() => _matchObjectType;
     public bool IsType(MatchObjectType matchObjectType) => _matchObjectType == matchObjectType;
 
     public void Initialize(MatchObjectType matchObjectType)

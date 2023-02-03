@@ -4,6 +4,14 @@ public class InputHandler : MonoBehaviour
 {
     [SerializeField] private Camera _camera;
     private MatchObject _firstMatchObject;
+    private GridBoard _gridBoard;
+    private MatchChecker _matchChecker;
+
+    public void Initialize(GridBoard gridBoard)
+    {
+        _gridBoard = gridBoard;
+        _matchChecker = new MatchChecker(gridBoard);
+    }
 
     private void Update()
     {
@@ -16,7 +24,7 @@ public class InputHandler : MonoBehaviour
         if(!GridBoard.IsTouchingGrid(worldPoint)) return;
         
         var gridCoordinates = GridBoard.GetGridCoordinatesFromWorldPoint(worldPoint);
-        var pressedMatchObject = GridBoard.MatchObjectsArray[gridCoordinates.X, gridCoordinates.Y];
+        var pressedMatchObject = _gridBoard.MatchObjectsArray[gridCoordinates.X, gridCoordinates.Y];
         
         if (isJustPressed)
         {
@@ -52,11 +60,15 @@ public class InputHandler : MonoBehaviour
             ReleaseFirstMatchObject();
             return;
         }
-        
+        Swap(firstMatchObject,secondMatchObject);
+    }
+
+    private void Swap(MatchObject firstMatchObject,MatchObject secondMatchObject)
+    {
         secondMatchObject.SetObjectSelectedState(true);
-        GridBoard.SwapMatchObjects(firstMatchObject,secondMatchObject);
+        _gridBoard.SwapMatchObjects(firstMatchObject,secondMatchObject);
         _firstMatchObject = null;
-        
+        _matchChecker.CheckMatches(firstMatchObject,secondMatchObject);
     }
 
     private void ReleaseFirstMatchObject()

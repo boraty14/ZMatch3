@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public static class GridBoard
+public class GridBoard
 {
     private const float GridCellSize = 0.86f;
     private const float GridCellInterval = 0.07f;
@@ -9,7 +9,7 @@ public static class GridBoard
     private const float GridStartingPointY = -6f;
     private const float GridSpriteVerticalOffset = -0.05f;
     public const int GridSize = 8;
-    public static readonly MatchObject[,] MatchObjectsArray = new MatchObject[GridSize, GridSize];
+    public readonly MatchObject[,] MatchObjectsArray = new MatchObject[GridSize, GridSize];
 
     public static GridCoordinates GetGridCoordinatesFromWorldPoint(Vector3 worldPoint)
     {
@@ -49,7 +49,7 @@ public static class GridBoard
         return new Vector3(xPosition, yPosition, 0f);
     }
     
-    public static void SwapMatchObjects(MatchObject firstObject, MatchObject secondObject)
+    public void SwapMatchObjects(MatchObject firstObject, MatchObject secondObject)
     {
         firstObject.PlaySwapAnimation(secondObject.transform.position);
         secondObject.PlaySwapAnimation(firstObject.transform.position);
@@ -58,7 +58,7 @@ public static class GridBoard
         SwapMatchObjectsInArray(firstGridCoordinates,secondGridCoordinates);
     }
 
-    private static void SwapMatchObjectsInArray(GridCoordinates firstGridCoordinates,GridCoordinates secondGridCoordinates)
+    private void SwapMatchObjectsInArray(GridCoordinates firstGridCoordinates,GridCoordinates secondGridCoordinates)
     {
         (MatchObjectsArray[firstGridCoordinates.X, firstGridCoordinates.Y],
                 MatchObjectsArray[secondGridCoordinates.X, secondGridCoordinates.Y]) =
