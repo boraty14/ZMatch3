@@ -9,7 +9,13 @@ public class GridBoard
     private const float GridStartingPointY = -6f;
     private const float GridSpriteVerticalOffset = -0.05f;
     public const int GridSize = 8;
+    private MatchChecker _matchChecker;
     public readonly MatchObject[,] MatchObjectsArray = new MatchObject[GridSize, GridSize];
+
+    public GridBoard()
+    {
+        _matchChecker = new MatchChecker(this);
+    }
 
     public static GridCoordinates GetGridCoordinatesFromWorldPoint(Vector3 worldPoint)
     {
@@ -56,6 +62,7 @@ public class GridBoard
         var firstGridCoordinates = GetGridCoordinatesFromMatchObject(firstObject);
         var secondGridCoordinates = GetGridCoordinatesFromMatchObject(secondObject);
         SwapMatchObjectsInArray(firstGridCoordinates,secondGridCoordinates);
+        _matchChecker.CheckMatches(firstGridCoordinates,secondGridCoordinates);
     }
 
     private void SwapMatchObjectsInArray(GridCoordinates firstGridCoordinates,GridCoordinates secondGridCoordinates)

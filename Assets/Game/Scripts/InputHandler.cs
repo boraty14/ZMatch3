@@ -5,12 +5,10 @@ public class InputHandler : MonoBehaviour
     [SerializeField] private Camera _camera;
     private MatchObject _firstMatchObject;
     private GridBoard _gridBoard;
-    private MatchChecker _matchChecker;
 
     public void Initialize(GridBoard gridBoard)
     {
         _gridBoard = gridBoard;
-        _matchChecker = new MatchChecker(gridBoard);
     }
 
     private void Update()
@@ -68,7 +66,6 @@ public class InputHandler : MonoBehaviour
         secondMatchObject.SetObjectSelectedState(true);
         _gridBoard.SwapMatchObjects(firstMatchObject,secondMatchObject);
         _firstMatchObject = null;
-        _matchChecker.CheckMatches(firstMatchObject,secondMatchObject);
     }
 
     private void ReleaseFirstMatchObject()

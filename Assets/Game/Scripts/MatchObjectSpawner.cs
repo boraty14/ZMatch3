@@ -1,4 +1,6 @@
+using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class MatchObjectSpawner : PoolerBase<MatchObject>
 {
@@ -10,6 +12,22 @@ public class MatchObjectSpawner : PoolerBase<MatchObject>
         _gridBoard = gridBoard;
         InitPool(_matchObjectPrefab,GridBoard.GridSize * GridBoard.GridSize);
         InitializeMatchObjects();
+    }
+
+    private void OnEnable()
+    {
+        EventBus.OnBlastObject += EventBus_OnBlastObject;
+    }
+
+    private void OnDisable()
+    {
+        EventBus.OnBlastObject -= EventBus_OnBlastObject;
+    }
+
+    private void EventBus_OnBlastObject(GridCoordinates gridCoordinates)
+    {
+        var blastObject = _gridBoard.MatchObjectsArray[gridCoordinates.X, gridCoordinates.Y];
+        Release(blastObject);
     }
 
     private void InitializeMatchObjects()

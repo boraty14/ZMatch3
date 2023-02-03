@@ -5,47 +5,66 @@ public class MatchChecker
 {
     private readonly GridBoard _gridBoard;
     private MatchObjectType _checkType;
-    private List<GridCoordinates> _matchingObjectsCoordinatesList;
+    private const int MinimumMatchCount = 3;
+
+    private static readonly Vector2Int[] VerticalDirections = new Vector2Int[] { Vector2Int.up, Vector2Int.down };
+    private static readonly Vector2Int[] HorizontalDirections = new Vector2Int[] { Vector2Int.left, Vector2Int.right };
 
     public MatchChecker(GridBoard gridBoard)
     {
         _gridBoard = gridBoard;
-        _matchingObjectsCoordinatesList = new List<GridCoordinates>();
-    }
-    
-    public void CheckMatches(MatchObject firstObject, MatchObject secondObject)
-    {
-        CheckMatchObject(firstObject);
-        CheckMatchObject(secondObject);
     }
 
-    private void CheckMatchObject(MatchObject matchObject)
+    public void CheckMatches(GridCoordinates firstCoordinates, GridCoordinates secondCoordinates)
     {
-        var matchObjectCoordinates = GridBoard.GetGridCoordinatesFromMatchObject(matchObject);
+        CheckMatchObject(firstCoordinates);
+        CheckMatchObject(secondCoordinates);
+    }
+
+    private void CheckMatchObject(GridCoordinates gridCoordinates)
+    {
+        var matchObject = _gridBoard.MatchObjectsArray[gridCoordinates.X, gridCoordinates.Y];
         _checkType = matchObject.GetMatchObjectType();
-        CheckMatch(matchObjectCoordinates);
+        var verticalMatchList =  GetDirectionMatchList(gridCoordinates,VerticalDirections);
+        var horizontalMatchList =  GetDirectionMatchList(gridCoordinates,HorizontalDirections);
+
+        var isVerticalMatch = verticalMatchList.Count >= MinimumMatchCount - 1;
+        var isHorizontalMatch = horizontalMatchList.Count >= MinimumMatchCount - 1;
+        
+        if(!isVerticalMatch && !isHorizontalMatch)  return;
+        
+        if (isVerticalMatch) BlastObjectsInDirection(verticalMatchList);
+        if (isHorizontalMatch) BlastObjectsInDirection(horizontalMatchList);
+        BlastSingleObject(gridCoordinates);
+
     }
 
-    private void CheckMatch(GridCoordinates gridCoordinates)
+    private List<GridCoordinates> GetDirectionMatchList(GridCoordinates gridCoordinates, IEnumerable<Vector2Int> directions)
     {
-        CheckDirectionForMatch(gridCoordinates, Vector2Int.up);
-        CheckDirectionForMatch(gridCoordinates, Vector2Int.down);
-        CheckDirectionForMatch(gridCoordinates, Vector2Int.left);
-        CheckDirectionForMatch(gridCoordinates, Vector2Int.right);
-    }
-
-    private void CheckDirectionForMatch(GridCoordinates gridCoordinates, Vector2Int direction)
-    {
-        while (true)
+        var matchCoordinatesList = new List<GridCoordinates>();
+        var startingCoordinates = gridCoordinates;
+        foreach (var direction in directions)
         {
-            gridCoordinates.ApplyDirection(direction);
-            if (!IsIndexValid(gridCoordinates)) return;
-
-            var checkObject = _gridBoard.MatchObjectsArray[gridCoordinates.X, gridCoordinates.Y];
-            if (!checkObject.IsType(_checkType)) return;
-
-            _matchingObjectsCoordinatesList.Add(gridCoordinates);
+            gridCoordinates = startingCoordinates;
+            while (true)
+            {
+                Debug.Log("before " + gridCoordinates);
+                gridCoordinates.ApplyDirection(direction);
+                Debug.Log("after " + gridCoordinates);
+                if (!IsObjectAtCoordinatesMatching(gridCoordinates)) break;
+                Debug.Log("added " + gridCoordinates);
+                matchCoordinatesList.Add(gridCoordinates);
+            }
         }
+        return matchCoordinatesList;
+    }
+
+    private bool IsObjectAtCoordinatesMatching(GridCoordinates gridCoordinates)
+    {
+        if (!IsIndexValid(gridCoordinates)) return false;
+        
+        var checkObject = _gridBoard.MatchObjectsArray[gridCoordinates.X, gridCoordinates.Y];
+        return checkObject.IsType(_checkType);
     }
 
     private static bool IsIndexValid(GridCoordinates gridCoordinates)
@@ -54,13 +73,17 @@ public class MatchChecker
                gridCoordinates.Y >= 0 && gridCoordinates.Y < GridBoard.GridSize;
     }
 
-    private void BlastAllObjects()
+    private void BlastObjectsInDirection(IEnumerable<GridCoordinates> gridCoordinatesList)
     {
-        
+        foreach (var gridCoordinates in gridCoordinatesList)
+        {
+            Debug.Log(11);
+            BlastSingleObject(gridCoordinates);
+        }
     }
 
-    private void BlastMatchObject(GridCoordinates gridCoordinates)
+    private void BlastSingleObject(GridCoordinates gridCoordinates)
     {
-        
+        EventBus.OnBlastObject?.Invoke(gridCoordinates);
     }
 }
