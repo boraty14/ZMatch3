@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -15,7 +16,7 @@ public class MatchObjectSpawner : PoolerBase<MatchObject>
         _gridBoard = gridBoard;
         _matchTypeCount = Enum.GetNames(typeof(MatchObjectType)).Length;
         ResetSpawnColumnList();
-        InitPool(_matchObjectPrefab,GridBoard.GridSize * GridBoard.GridSize);
+        InitPool(_matchObjectPrefab, GridBoard.GridSize * GridBoard.GridSize);
         InitializeMatchObjects();
     }
 
@@ -44,6 +45,11 @@ public class MatchObjectSpawner : PoolerBase<MatchObject>
             Release(blastObject);
             _columnSpawnCountDictionary[gridCoordinates.X]++;
         }
+        
+    }
+
+    public async Task GenerateObjectsAfterBlast()
+    {
     }
 
     private MatchObjectType GetRandomMatchType()
