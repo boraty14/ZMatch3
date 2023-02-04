@@ -69,6 +69,7 @@ public class InputHandler : MonoBehaviour
     {
         _isSwapping = true;
         await _gridBoard.SwapMatchObjects(firstMatchObject,secondMatchObject);
+        //TODO also wait for the fall
         _isSwapping = false;
         _firstMatchObject = null;
     }

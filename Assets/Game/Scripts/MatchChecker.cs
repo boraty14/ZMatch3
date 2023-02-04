@@ -30,7 +30,7 @@ public class MatchChecker
         return isVerticalMatch || isHorizontalMatch;
     }
 
-    private bool IsThereAnyMatchInAxis(GridCoordinates gridCoordinates, IEnumerable<Vector2Int> axisDirections)
+    private bool IsThereAnyMatchInAxis(GridCoordinates gridCoordinates, Vector2Int[] axisDirections)
     {
         int matchCount = 0;
         var startingCoordinates = gridCoordinates;
@@ -47,8 +47,9 @@ public class MatchChecker
         return matchCount >= MinimumMatchCount - 1;
     }
 
-    public async void BlastMatchingObjects(GridCoordinates firstCoordinates, GridCoordinates secondCoordinates)
+    public async Task BlastMatchingObjects(GridCoordinates firstCoordinates, GridCoordinates secondCoordinates)
     {
+        _matchingCoordinatesList.Clear();
         SetMatchesOfObject(firstCoordinates);
         SetMatchesOfObject(secondCoordinates);
         var blastTasks = new List<Task>();
@@ -58,18 +59,23 @@ public class MatchChecker
             blastTasks.Add(matchingObject.Blast());
         }
         await Task.WhenAll(blastTasks);
+        EventBus.OnBlastObjects?.Invoke(_matchingCoordinatesList);
     }
 
     private void SetMatchesOfObject(GridCoordinates gridCoordinates)
     {
         var matchObject = _gridBoard.GetMatchObjectFromCoordinates(gridCoordinates);
         _checkType = matchObject.GetMatchObjectType();
-        SetMatchesInAxis(gridCoordinates, VerticalAxisDirections);
-        SetMatchesInAxis(gridCoordinates, HorizontalAxisDirections);
+        var isVerticalMatch = IsThereAnyMatchInAxis(gridCoordinates, VerticalAxisDirections);
+        var isHorizontalMatch = IsThereAnyMatchInAxis(gridCoordinates, HorizontalAxisDirections);
+        if (!isVerticalMatch && !isHorizontalMatch) return;
+        
+        if(isVerticalMatch) SetMatchesInAxis(gridCoordinates, VerticalAxisDirections);
+        if(isHorizontalMatch) SetMatchesInAxis(gridCoordinates, HorizontalAxisDirections);
         _matchingCoordinatesList.Add(gridCoordinates);
     }
 
-    private void SetMatchesInAxis(GridCoordinates gridCoordinates, IEnumerable<Vector2Int> axisDirections)
+    private void SetMatchesInAxis(GridCoordinates gridCoordinates, Vector2Int[] axisDirections)
     {
         var startingCoordinates = gridCoordinates;
         foreach (var direction in axisDirections)

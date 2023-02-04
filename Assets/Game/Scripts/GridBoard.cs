@@ -69,16 +69,16 @@ public class GridBoard
         var secondGridCoordinates = GetGridCoordinatesFromMatchObject(secondObject);
         SwapMatchObjectsInArray(firstGridCoordinates,secondGridCoordinates);
         await swapTask;
+        firstObject.SetObjectSelectedState(false);
+        secondObject.SetObjectSelectedState(false);
         
         if (_matchChecker.IsThereAnyMatch(firstGridCoordinates, secondGridCoordinates))
         {
-            _matchChecker.BlastMatchingObjects(firstGridCoordinates,secondGridCoordinates);   
+            await _matchChecker.BlastMatchingObjects(firstGridCoordinates,secondGridCoordinates); 
             return;
         }
 
         await RunObjectSwapAnimationTask(firstObject, secondObject);
-        firstObject.SetObjectSelectedState(false);
-        secondObject.SetObjectSelectedState(false);
         SwapMatchObjectsInArray(firstGridCoordinates,secondGridCoordinates);
     }
 

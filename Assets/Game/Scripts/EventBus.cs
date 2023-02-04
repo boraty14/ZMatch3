@@ -1,7 +1,8 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EventBus : MonoBehaviour
 {
-    public static Action<GridCoordinates> OnBlastObject;
+    public static Action<List<GridCoordinates>> OnBlastObjects;
 }
