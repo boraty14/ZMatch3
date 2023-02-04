@@ -9,6 +9,7 @@ public class MatchChecker
     private readonly List<GridCoordinates> _matchingCoordinatesList = new List<GridCoordinates>();
     private static readonly Vector2Int[] VerticalAxisDirections = { Vector2Int.up, Vector2Int.down };
     private static readonly Vector2Int[] HorizontalAxisDirections = { Vector2Int.left, Vector2Int.right };
+    private static readonly bool[,] CheckedCoordinatesList = new bool[GridBoard.GridSize, GridBoard.GridSize];
     private const int MinimumMatchCount = 3;
 
     public MatchChecker(GridBoard gridBoard)
@@ -47,19 +48,22 @@ public class MatchChecker
         return matchCount >= MinimumMatchCount - 1;
     }
 
-    public async Task BlastMatchingObjects(GridCoordinates firstCoordinates, GridCoordinates secondCoordinates)
+    public List<GridCoordinates> GetMatchingObjectsCoordinates()
     {
-        _matchingCoordinatesList.Clear();
-        SetMatchesOfObject(firstCoordinates);
-        SetMatchesOfObject(secondCoordinates);
-        var blastTasks = new List<Task>();
-        foreach (var matchingCoordinates in _matchingCoordinatesList)
+        ResetCheckStates();
+        for (int i = 0; i < GridBoard.GridSize; i++)
         {
-            var matchingObject = _gridBoard.GetMatchObjectFromCoordinates(matchingCoordinates);
-            blastTasks.Add(matchingObject.Blast());
+            for (int j = 0; j < GridBoard.GridSize; j++)
+            {
+                if(CheckedCoordinatesList[j,i]) continue;
+                var objectCoordinates = new GridCoordinates { X = j, Y = i };
+                if (IsObjectCreatingMatch(objectCoordinates))
+                {
+                    SetMatchesOfObject(objectCoordinates);
+                }
+            }
         }
-        await Task.WhenAll(blastTasks);
-        EventBus.OnBlastObjects?.Invoke(_matchingCoordinatesList);
+        return _matchingCoordinatesList;
     }
 
     private void SetMatchesOfObject(GridCoordinates gridCoordinates)
@@ -88,6 +92,25 @@ public class MatchChecker
                 _matchingCoordinatesList.Add(gridCoordinates);
             }
         }
+    }
+
+    private void AddCoordinatesToMatchList(GridCoordinates gridCoordinates)
+    {
+        _matchingCoordinatesList.Add(gridCoordinates);
+        CheckedCoordinatesList[gridCoordinates.X, gridCoordinates.Y] = true;
+    }
+
+    private void ResetCheckStates()
+    {
+        for (int i = 0; i < GridBoard.GridSize; i++)
+        {
+            for (int j = 0; j < GridBoard.GridSize; j++)
+            {
+                CheckedCoordinatesList[j, i] = false;
+            }   
+        }
+        _matchingCoordinatesList.Clear();
+        
     }
 
     private bool IsObjectAtCoordinatesMatching(GridCoordinates gridCoordinates)

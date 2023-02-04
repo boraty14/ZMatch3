@@ -8,6 +8,7 @@ public class MatchObject : MonoBehaviour
     public MatchObjectType _matchObjectType;
     private const float SelectedScaleFactor = 1.5f;
     private const float SwapAnimationDuration = 0.2f;
+    private const float FallDurationFactor = 0.2f;
 
     public MatchObjectType GetMatchObjectType() => _matchObjectType;
     public bool IsType(MatchObjectType matchObjectType) => _matchObjectType == matchObjectType;
@@ -16,6 +17,12 @@ public class MatchObject : MonoBehaviour
     {
         _matchObjectType = matchObjectType;
         _spriteRenderer.sprite = MatchObjectSpriteData.Instance.GetSprite(_matchObjectType);
+    }
+
+    public async Task Fall(Vector3 fallPosition, int fallCount)
+    {
+        await transform.DOMove(fallPosition, fallCount * FallDurationFactor).SetEase(Ease.Linear)
+            .AsyncWaitForCompletion();
     }
 
     public void SetObjectSelectedState(bool isSelected)

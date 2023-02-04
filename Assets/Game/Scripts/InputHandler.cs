@@ -3,6 +3,7 @@ using UnityEngine;
 public class InputHandler : MonoBehaviour
 {
     [SerializeField] private Camera _camera;
+    [SerializeField] private MatchObjectSpawner _matchObjectSpawner;
     private MatchObject _firstMatchObject;
     private GridBoard _gridBoard;
     private bool _isSwapping;

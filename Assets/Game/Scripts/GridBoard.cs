@@ -1,6 +1,5 @@
-using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using DG.Tweening;
 using UnityEngine;
 
 public class GridBoard
@@ -13,6 +12,7 @@ public class GridBoard
     private const float GridSpriteVerticalOffset = -0.05f;
     public const int GridSize = 8;
     private readonly MatchChecker _matchChecker;
+    private readonly Dictionary<int, int> _columnBlastCountDictionary = new Dictionary<int, int>();
     public readonly MatchObject[,] MatchObjectsArray = new MatchObject[GridSize, GridSize];
 
     public GridBoard()
@@ -61,26 +61,61 @@ public class GridBoard
                         GridSpriteVerticalOffset;
         return new Vector3(xPosition, yPosition, 0f);
     }
-    
+
     public async Task SwapMatchObjects(MatchObject firstObject, MatchObject secondObject)
     {
         var swapTask = RunObjectSwapAnimationTask(firstObject, secondObject);
         var firstGridCoordinates = GetGridCoordinatesFromMatchObject(firstObject);
         var secondGridCoordinates = GetGridCoordinatesFromMatchObject(secondObject);
-        SwapMatchObjectsInArray(firstGridCoordinates,secondGridCoordinates);
+        SwapMatchObjectsInArray(firstGridCoordinates, secondGridCoordinates);
         await swapTask;
         firstObject.SetObjectSelectedState(false);
         secondObject.SetObjectSelectedState(false);
-        
-        if (_matchChecker.IsThereAnyMatch(firstGridCoordinates, secondGridCoordinates))
+
+        var matchingObjectsCoordinates = _matchChecker.GetMatchingObjectsCoordinates();
+        if (matchingObjectsCoordinates.Count == 0)
         {
-            await _matchChecker.BlastMatchingObjects(firstGridCoordinates,secondGridCoordinates); 
+            await RunObjectSwapAnimationTask(firstObject, secondObject);
+            SwapMatchObjectsInArray(firstGridCoordinates, secondGridCoordinates);
+            return;
+        }
+
+        await BlastMatchingObjects(matchingObjectsCoordinates);
+        await MakeObjectsFallAfterBlast();
+
+
+
+
+        /*if (_matchChecker.IsThereAnyMatch())
+        {
+            var matchingObjectsCoordinates =
+                _matchChecker.GetMatchingObjectsCoordinates();
+            await BlastMatchingObjects(matchingObjectsCoordinates);
             return;
         }
 
         await RunObjectSwapAnimationTask(firstObject, secondObject);
-        SwapMatchObjectsInArray(firstGridCoordinates,secondGridCoordinates);
+        SwapMatchObjectsInArray(firstGridCoordinates, secondGridCoordinates);*/
     }
+
+    private async Task BlastMatchingObjects(List<GridCoordinates> matchingCoordinatesList)
+    {
+        ResetBlastColumnDictionary();
+        var blastTasks = new List<Task>();
+        foreach (var matchingCoordinates in matchingCoordinatesList)
+        {
+            _columnBlastCountDictionary[matchingCoordinates.Y]++;
+            var matchingObject = GetMatchObjectFromCoordinates(matchingCoordinates);
+            blastTasks.Add(matchingObject.Blast());
+        }
+        await Task.WhenAll(blastTasks);
+    }
+
+    private async Task MakeObjectsFallAfterBlast()
+    {
+        
+    }
+
 
     private static async Task RunObjectSwapAnimationTask(MatchObject firstObject, MatchObject secondObject)
     {
@@ -91,11 +126,19 @@ public class GridBoard
         await Task.WhenAll(firstSwapTask, secondSwapTask);
     }
 
-    private void SwapMatchObjectsInArray(GridCoordinates firstGridCoordinates,GridCoordinates secondGridCoordinates)
+    private void SwapMatchObjectsInArray(GridCoordinates firstGridCoordinates, GridCoordinates secondGridCoordinates)
     {
         (MatchObjectsArray[firstGridCoordinates.X, firstGridCoordinates.Y],
                 MatchObjectsArray[secondGridCoordinates.X, secondGridCoordinates.Y]) =
             (MatchObjectsArray[secondGridCoordinates.X, secondGridCoordinates.Y],
                 MatchObjectsArray[firstGridCoordinates.X, firstGridCoordinates.Y]);
+    }
+
+    private void ResetBlastColumnDictionary()
+    {
+        for (int i = 0; i < GridSize; i++)
+        {
+            _columnBlastCountDictionary[i] = 0;
+        }
     }
 }
