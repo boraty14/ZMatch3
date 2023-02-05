@@ -9,13 +9,11 @@ public class MatchObjectSpawner : PoolerBase<MatchObject>
     [SerializeField] private MatchObject _matchObjectPrefab;
     private GridBoard _gridBoard;
     private int _matchTypeCount;
-    private readonly Dictionary<int, int> _columnSpawnCountDictionary = new Dictionary<int, int>();
 
     public void Initialize(GridBoard gridBoard)
     {
         _gridBoard = gridBoard;
         _matchTypeCount = Enum.GetNames(typeof(MatchObjectType)).Length;
-        ResetSpawnColumnList();
         InitPool(_matchObjectPrefab, GridBoard.GridSize * GridBoard.GridSize);
         InitializeMatchObjects();
     }
@@ -43,13 +41,27 @@ public class MatchObjectSpawner : PoolerBase<MatchObject>
         {
             var blastObject = _gridBoard.GetMatchObjectFromCoordinates(gridCoordinates);
             Release(blastObject);
-            _columnSpawnCountDictionary[gridCoordinates.X]++;
         }
-        
     }
 
-    public async Task GenerateObjectsAfterBlast()
+    public async Task GenerateAndPlaceObjectsAfterBlast(Dictionary<int,int> columnBlastDictionary)
     {
+        var placementTasks = new List<Task>();
+        for (int i = 0; i < GridBoard.GridSize; i++)
+        {
+            var columnBlastCount = columnBlastDictionary[i];
+            for (int j = 0; j < columnBlastCount; j++)
+            {
+                var spawnPosition = GridBoard.GetNewSpawnPosition(i, j);
+                var matchObject = GetItemFromPool();
+                matchObject.transform.position = spawnPosition;
+                var spawnCoordinates = new GridCoordinates { X = i, Y = GridBoard.GridSize - columnBlastCount + j };
+                _gridBoard.MatchObjectsArray[spawnCoordinates.X, spawnCoordinates.Y] = matchObject;
+                matchObject.Initialize(GetRandomMatchType(), spawnCoordinates, _gridBoard);
+                placementTasks.Add(matchObject.PlaceAfterSpawning());
+            }
+        }
+        await Task.WhenAll(placementTasks);
     }
 
     private MatchObjectType GetRandomMatchType()
@@ -66,19 +78,11 @@ public class MatchObjectSpawner : PoolerBase<MatchObject>
             {
                 var matchObject = GetItemFromPool();
                 _gridBoard.MatchObjectsArray[j, i] = matchObject;
-                matchObject.Initialize(GetRandomMatchType());
-                matchObject.transform.name = $"{j},{i}";
+                var coordinates = new GridCoordinates { X = j, Y = i };
+                matchObject.Initialize(GetRandomMatchType(), coordinates, _gridBoard);
                 matchObject.transform.position =
-                    GridBoard.GetWorldPositionFromGridCoordinates(new GridCoordinates { X = j, Y = i });
+                    GridBoard.GetWorldPositionFromGridCoordinates(coordinates);
             }
-        }
-    }
-
-    private void ResetSpawnColumnList()
-    {
-        for (int i = 0; i < GridBoard.GridSize; i++)
-        {
-            _columnSpawnCountDictionary[i] = 0;
         }
     }
 }

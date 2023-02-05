@@ -76,7 +76,7 @@ public class MatchChecker
         
         if(isVerticalMatch) SetMatchesInAxis(gridCoordinates, VerticalAxisDirections);
         if(isHorizontalMatch) SetMatchesInAxis(gridCoordinates, HorizontalAxisDirections);
-        _matchingCoordinatesList.Add(gridCoordinates);
+        AddCoordinatesToMatchList(gridCoordinates);
     }
 
     private void SetMatchesInAxis(GridCoordinates gridCoordinates, Vector2Int[] axisDirections)
@@ -89,7 +89,7 @@ public class MatchChecker
             {
                 gridCoordinates.ApplyDirection(direction);
                 if (!IsObjectAtCoordinatesMatching(gridCoordinates)) break;
-                _matchingCoordinatesList.Add(gridCoordinates);
+                AddCoordinatesToMatchList(gridCoordinates);
             }
         }
     }

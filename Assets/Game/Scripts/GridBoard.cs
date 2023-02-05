@@ -11,13 +11,26 @@ public class GridBoard
     private const float GridStartingPointY = -6f;
     private const float GridSpriteVerticalOffset = -0.05f;
     public const int GridSize = 8;
+    public const float NewGenerateHeightOffset = 1.5f;
+    
     private readonly MatchChecker _matchChecker;
-    private readonly Dictionary<int, int> _columnBlastCountDictionary = new Dictionary<int, int>();
+    private readonly MatchObjectBlaster _matchObjectBlaster;
+    private readonly MatchObjectSpawner _matchObjectSpawner;
     public readonly MatchObject[,] MatchObjectsArray = new MatchObject[GridSize, GridSize];
 
-    public GridBoard()
+    public GridBoard(MatchObjectSpawner matchObjectSpawner)
     {
         _matchChecker = new MatchChecker(this);
+        _matchObjectBlaster = new MatchObjectBlaster(this);
+        _matchObjectSpawner = matchObjectSpawner;
+    }
+
+    public static Vector3 GetNewSpawnPosition(int columnIndex, int spawnCount)
+    {
+        var xPosition = GridCellIndexSize * columnIndex + GridCellSize / 2f + GridStartingPointX;
+        var yPosition = GridCellIndexSize * (GridSize - 1 + spawnCount) + GridCellSize / 2f + GridStartingPointY +
+                        GridSpriteVerticalOffset + NewGenerateHeightOffset;
+        return new Vector3(xPosition, yPosition, 0f);
     }
 
     public MatchObject GetMatchObjectFromCoordinates(GridCoordinates gridCoordinates)
@@ -79,43 +92,30 @@ public class GridBoard
             SwapMatchObjectsInArray(firstGridCoordinates, secondGridCoordinates);
             return;
         }
-
-        await BlastMatchingObjects(matchingObjectsCoordinates);
-        await MakeObjectsFallAfterBlast();
-
-
-
-
-        /*if (_matchChecker.IsThereAnyMatch())
+        
+        while (matchingObjectsCoordinates.Count != 0)
         {
-            var matchingObjectsCoordinates =
-                _matchChecker.GetMatchingObjectsCoordinates();
-            await BlastMatchingObjects(matchingObjectsCoordinates);
-            return;
+            var columnBlastDictionary = await _matchObjectBlaster.BlastMatchingObjectsAndGetBlastDictionary(matchingObjectsCoordinates);
+            var existingObjectsFallTask = MakeObjectsFallAfterBlast();
+            var spawnedObjectsFallTask = _matchObjectSpawner.GenerateAndPlaceObjectsAfterBlast(columnBlastDictionary);
+            await Task.WhenAll(existingObjectsFallTask, spawnedObjectsFallTask);
+            matchingObjectsCoordinates = _matchChecker.GetMatchingObjectsCoordinates();
         }
-
-        await RunObjectSwapAnimationTask(firstObject, secondObject);
-        SwapMatchObjectsInArray(firstGridCoordinates, secondGridCoordinates);*/
-    }
-
-    private async Task BlastMatchingObjects(List<GridCoordinates> matchingCoordinatesList)
-    {
-        ResetBlastColumnDictionary();
-        var blastTasks = new List<Task>();
-        foreach (var matchingCoordinates in matchingCoordinatesList)
-        {
-            _columnBlastCountDictionary[matchingCoordinates.Y]++;
-            var matchingObject = GetMatchObjectFromCoordinates(matchingCoordinates);
-            blastTasks.Add(matchingObject.Blast());
-        }
-        await Task.WhenAll(blastTasks);
+        
     }
 
     private async Task MakeObjectsFallAfterBlast()
     {
-        
+        var fallTasks = new List<Task>();
+        for (int i = 0; i < GridSize; i++)
+        {
+            for (int j = 0; j < GridSize; j++)
+            {
+                fallTasks.Add(MatchObjectsArray[j, i].Fall());
+            }
+        }
+        await Task.WhenAll(fallTasks);
     }
-
 
     private static async Task RunObjectSwapAnimationTask(MatchObject firstObject, MatchObject secondObject)
     {
@@ -132,13 +132,5 @@ public class GridBoard
                 MatchObjectsArray[secondGridCoordinates.X, secondGridCoordinates.Y]) =
             (MatchObjectsArray[secondGridCoordinates.X, secondGridCoordinates.Y],
                 MatchObjectsArray[firstGridCoordinates.X, firstGridCoordinates.Y]);
-    }
-
-    private void ResetBlastColumnDictionary()
-    {
-        for (int i = 0; i < GridSize; i++)
-        {
-            _columnBlastCountDictionary[i] = 0;
-        }
     }
 }

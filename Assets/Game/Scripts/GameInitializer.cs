@@ -7,7 +7,7 @@ public class GameInitializer : MonoBehaviour
     
     private void Start()
     {
-        var gridBoard = new GridBoard();
+        var gridBoard = new GridBoard(_matchObjectSpawner);
         _inputHandler.Initialize(gridBoard);
         _matchObjectSpawner.Initialize(gridBoard);
     }
