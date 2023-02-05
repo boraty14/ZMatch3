@@ -23,6 +23,7 @@ public class MatchObjectSpawner : PoolerBase<MatchObject>
         base.GetSetup(obj);
         obj.transform.localScale = Vector3.one;
         obj.SetObjectSelectedState(false);
+        obj.ResetFallCount();
     }
 
     private void OnEnable()

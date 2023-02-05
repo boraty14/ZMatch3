@@ -96,6 +96,9 @@ public class MatchChecker
 
     private void AddCoordinatesToMatchList(GridCoordinates gridCoordinates)
     {
+        if (CheckedCoordinatesList[gridCoordinates.X, gridCoordinates.Y]) return;
+        var matchObject = _gridBoard.GetMatchObjectFromCoordinates(gridCoordinates);
+        matchObject.ResetFallCount();
         _matchingCoordinatesList.Add(gridCoordinates);
         CheckedCoordinatesList[gridCoordinates.X, gridCoordinates.Y] = true;
     }

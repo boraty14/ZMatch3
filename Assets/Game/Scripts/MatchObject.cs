@@ -11,9 +11,11 @@ public class MatchObject : MonoBehaviour
     private GridBoard _gridBoard;
     private const float SelectedScaleFactor = 1.5f;
     private const float SwapAnimationDuration = 0.2f;
-    private const float FallDurationFactor = 0.2f;
+    private const float FallDurationFactor = 0.15f;
 
     public void AddFallCount() => _fallCount++;
+    public void ResetFallCount() => _fallCount = 0;
+    public void SetCoordinates(GridCoordinates gridCoordinates) => _objectCoordinates = gridCoordinates;
     public MatchObjectType GetMatchObjectType() => _matchObjectType;
     public bool IsType(MatchObjectType matchObjectType) => _matchObjectType == matchObjectType;
 
@@ -41,11 +43,11 @@ public class MatchObject : MonoBehaviour
         if(_fallCount == 0) return;
         
         _objectCoordinates.Y -= _fallCount;
+        ResetFallCount();
+        _gridBoard.MatchObjectsArray[_objectCoordinates.X, _objectCoordinates.Y] = this; 
         var fallPosition = GridBoard.GetWorldPositionFromGridCoordinates(_objectCoordinates);
         await transform.DOMove(fallPosition,GetFallDuration(fallPosition)).SetEase(Ease.Linear)
             .AsyncWaitForCompletion();
-        _gridBoard.MatchObjectsArray[_objectCoordinates.X, _objectCoordinates.Y] = this; 
-        _fallCount = 0;
     }
 
     public void SetObjectSelectedState(bool isSelected)
@@ -62,6 +64,6 @@ public class MatchObject : MonoBehaviour
     public async Task Blast()
     {
         await transform.DOScale(Vector3.zero, 0.2f).AsyncWaitForCompletion();
-        _fallCount = 0;
+        ResetFallCount();
     }
 }

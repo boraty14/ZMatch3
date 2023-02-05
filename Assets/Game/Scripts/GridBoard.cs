@@ -28,8 +28,8 @@ public class GridBoard
     public static Vector3 GetNewSpawnPosition(int columnIndex, int spawnCount)
     {
         var xPosition = GridCellIndexSize * columnIndex + GridCellSize / 2f + GridStartingPointX;
-        var yPosition = GridCellIndexSize * (GridSize - 1 + spawnCount) + GridCellSize / 2f + GridStartingPointY +
-                        GridSpriteVerticalOffset + NewGenerateHeightOffset;
+        var yPosition = GridCellIndexSize * (GridSize + spawnCount) + GridCellSize / 2f + GridStartingPointY +
+                        GridSpriteVerticalOffset;
         return new Vector3(xPosition, yPosition, 0f);
     }
 
@@ -128,6 +128,8 @@ public class GridBoard
 
     private void SwapMatchObjectsInArray(GridCoordinates firstGridCoordinates, GridCoordinates secondGridCoordinates)
     {
+        MatchObjectsArray[firstGridCoordinates.X,firstGridCoordinates.Y].SetCoordinates(secondGridCoordinates);
+        MatchObjectsArray[secondGridCoordinates.X,secondGridCoordinates.Y].SetCoordinates(firstGridCoordinates);
         (MatchObjectsArray[firstGridCoordinates.X, firstGridCoordinates.Y],
                 MatchObjectsArray[secondGridCoordinates.X, secondGridCoordinates.Y]) =
             (MatchObjectsArray[secondGridCoordinates.X, secondGridCoordinates.Y],
