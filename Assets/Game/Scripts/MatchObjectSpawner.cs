@@ -8,11 +8,13 @@ public class MatchObjectSpawner : PoolerBase<MatchObject>
 {
     [SerializeField] private MatchObject _matchObjectPrefab;
     private GridBoard _gridBoard;
+    private MatchChecker _matchChecker;
     private int _matchTypeCount;
 
     public void Initialize(GridBoard gridBoard)
     {
         _gridBoard = gridBoard;
+        _matchChecker = _gridBoard.matchChecker;
         _matchTypeCount = Enum.GetNames(typeof(MatchObjectType)).Length;
         InitPool(_matchObjectPrefab, GridBoard.GridSize * GridBoard.GridSize);
         InitializeMatchObjects();
@@ -81,6 +83,10 @@ public class MatchObjectSpawner : PoolerBase<MatchObject>
                 _gridBoard.MatchObjectsArray[j, i] = matchObject;
                 var coordinates = new GridCoordinates { X = j, Y = i };
                 matchObject.Initialize(GetRandomMatchType(), coordinates, _gridBoard);
+                while (_matchChecker.IsObjectCreatingMatch(coordinates))
+                {
+                    matchObject.Initialize(GetRandomMatchType(), coordinates, _gridBoard);
+                }
                 matchObject.transform.position =
                     GridBoard.GetWorldPositionFromGridCoordinates(coordinates);
             }

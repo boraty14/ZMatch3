@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 
 public class MatchChecker
@@ -22,7 +21,7 @@ public class MatchChecker
         return IsObjectCreatingMatch(firstCoordinates) || IsObjectCreatingMatch(secondCoordinates);
     }
 
-    private bool IsObjectCreatingMatch(GridCoordinates gridCoordinates)
+    public bool IsObjectCreatingMatch(GridCoordinates gridCoordinates)
     {
         var matchObject = _gridBoard.GetMatchObjectFromCoordinates(gridCoordinates);
         _checkType = matchObject.GetMatchObjectType();
@@ -118,7 +117,8 @@ public class MatchChecker
 
     private bool IsObjectAtCoordinatesMatching(GridCoordinates gridCoordinates)
     {
-        if (!IsIndexValid(gridCoordinates)) return false;
+        if (!IsIndexValid(gridCoordinates) || 
+            _gridBoard.MatchObjectsArray[gridCoordinates.X,gridCoordinates.Y] is null) return false;
 
         var checkObject = _gridBoard.GetMatchObjectFromCoordinates(gridCoordinates);
         return checkObject.IsType(_checkType);

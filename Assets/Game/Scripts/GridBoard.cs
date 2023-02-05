@@ -13,14 +13,14 @@ public class GridBoard
     public const int GridSize = 8;
     public const float NewGenerateHeightOffset = 1.5f;
     
-    private readonly MatchChecker _matchChecker;
+    public readonly MatchChecker matchChecker;
     private readonly MatchObjectBlaster _matchObjectBlaster;
     private readonly MatchObjectSpawner _matchObjectSpawner;
     public readonly MatchObject[,] MatchObjectsArray = new MatchObject[GridSize, GridSize];
 
     public GridBoard(MatchObjectSpawner matchObjectSpawner)
     {
-        _matchChecker = new MatchChecker(this);
+        matchChecker = new MatchChecker(this);
         _matchObjectBlaster = new MatchObjectBlaster(this);
         _matchObjectSpawner = matchObjectSpawner;
     }
@@ -85,7 +85,7 @@ public class GridBoard
         firstObject.SetObjectSelectedState(false);
         secondObject.SetObjectSelectedState(false);
 
-        var matchingObjectsCoordinates = _matchChecker.GetMatchingObjectsCoordinates();
+        var matchingObjectsCoordinates = matchChecker.GetMatchingObjectsCoordinates();
         if (matchingObjectsCoordinates.Count == 0)
         {
             await RunObjectSwapAnimationTask(firstObject, secondObject);
@@ -99,7 +99,7 @@ public class GridBoard
             var existingObjectsFallTask = MakeObjectsFallAfterBlast();
             var spawnedObjectsFallTask = _matchObjectSpawner.GenerateAndPlaceObjectsAfterBlast(columnBlastDictionary);
             await Task.WhenAll(existingObjectsFallTask, spawnedObjectsFallTask);
-            matchingObjectsCoordinates = _matchChecker.GetMatchingObjectsCoordinates();
+            matchingObjectsCoordinates = matchChecker.GetMatchingObjectsCoordinates();
         }
         
     }

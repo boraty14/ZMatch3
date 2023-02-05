@@ -12,6 +12,7 @@ public class MatchObject : MonoBehaviour
     private const float SelectedScaleFactor = 1.5f;
     private const float SwapAnimationDuration = 0.2f;
     private const float FallDurationFactor = 0.15f;
+    [SerializeField] private float _blastDuration;
 
     public void AddFallCount() => _fallCount++;
     public void ResetFallCount() => _fallCount = 0;
@@ -63,7 +64,7 @@ public class MatchObject : MonoBehaviour
 
     public async Task Blast()
     {
-        await transform.DOScale(Vector3.zero, 0.2f).AsyncWaitForCompletion();
+        await transform.DOScale(Vector3.zero, _blastDuration).AsyncWaitForCompletion();
         ResetFallCount();
     }
 }
