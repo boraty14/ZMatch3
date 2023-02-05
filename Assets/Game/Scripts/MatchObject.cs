@@ -11,8 +11,8 @@ public class MatchObject : MonoBehaviour
     private GridBoard _gridBoard;
     private const float SelectedScaleFactor = 1.5f;
     private const float SwapAnimationDuration = 0.2f;
-    private const float FallDurationFactor = 0.15f;
-    [SerializeField] private float _blastDuration;
+    private const float BlastAnimationDuration = 0.5f;
+    private const float FallDurationFactor = 0.12f;
 
     public void AddFallCount() => _fallCount++;
     public void ResetFallCount() => _fallCount = 0;
@@ -33,7 +33,6 @@ public class MatchObject : MonoBehaviour
 
     public async Task PlaceAfterSpawning()
     {
-        var fallFactor = GridBoard.GridSize - _objectCoordinates.Y;
         var placementPosition = GridBoard.GetWorldPositionFromGridCoordinates(_objectCoordinates);
         await transform.DOMove(placementPosition, GetFallDuration(placementPosition)).SetEase(Ease.Linear)
             .AsyncWaitForCompletion();
@@ -64,7 +63,7 @@ public class MatchObject : MonoBehaviour
 
     public async Task Blast()
     {
-        await transform.DOScale(Vector3.zero, _blastDuration).AsyncWaitForCompletion();
+        await transform.DOScale(Vector3.zero, BlastAnimationDuration).SetEase(Ease.InOutSine).AsyncWaitForCompletion();
         ResetFallCount();
     }
 }

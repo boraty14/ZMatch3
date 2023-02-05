@@ -73,7 +73,7 @@ public class MatchObjectSpawner : PoolerBase<MatchObject>
         return (MatchObjectType)randomTypeIndex;
     }
 
-    private void InitializeMatchObjects()
+    public void InitializeMatchObjects()
     {
         for (int i = 0; i < GridBoard.GridSize; i++)
         {

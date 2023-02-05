@@ -11,7 +11,6 @@ public class GridBoard
     private const float GridStartingPointY = -6f;
     private const float GridSpriteVerticalOffset = -0.05f;
     public const int GridSize = 8;
-    public const float NewGenerateHeightOffset = 1.5f;
     
     public readonly MatchChecker matchChecker;
     private readonly MatchObjectBlaster _matchObjectBlaster;
@@ -101,7 +100,6 @@ public class GridBoard
             await Task.WhenAll(existingObjectsFallTask, spawnedObjectsFallTask);
             matchingObjectsCoordinates = matchChecker.GetMatchingObjectsCoordinates();
         }
-        
     }
 
     private async Task MakeObjectsFallAfterBlast()

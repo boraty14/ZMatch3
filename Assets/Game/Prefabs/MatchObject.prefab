@@ -99,4 +99,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _spriteRenderer: {fileID: 613695691129827018}
   _matchObjectType: 0
-  _blastDuration: 1
+  _blastDuration: 0.5
