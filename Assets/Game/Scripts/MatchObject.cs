@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
@@ -26,6 +27,22 @@ public class MatchObject : MonoBehaviour
         _gridBoard = gridBoard;
         _matchObjectType = matchObjectType;
         _spriteRenderer.sprite = MatchObjectSpriteData.Instance.GetSprite(_matchObjectType);
+    }
+
+    private void OnEnable()
+    {
+        EventBus.OnLevelEnd += EventBus_OnLevelEnd;
+    }
+
+    private void OnDisable()
+    {
+        EventBus.OnLevelEnd -= EventBus_OnLevelEnd;
+        
+    }
+
+    private void EventBus_OnLevelEnd()
+    {
+        EventBus.OnBlastObject?.Invoke(this);
     }
 
     private float GetFallDuration(Vector3 targetPosition) =>
@@ -64,6 +81,7 @@ public class MatchObject : MonoBehaviour
     public async Task Blast()
     {
         await transform.DOScale(Vector3.zero, BlastAnimationDuration).SetEase(Ease.InOutSine).AsyncWaitForCompletion();
+        EventBus.OnBlastObject?.Invoke(this);
         ResetFallCount();
     }
 }

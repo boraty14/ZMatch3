@@ -17,7 +17,6 @@ public class MatchObjectSpawner : PoolerBase<MatchObject>
         _matchChecker = _gridBoard.matchChecker;
         _matchTypeCount = Enum.GetNames(typeof(MatchObjectType)).Length;
         InitPool(_matchObjectPrefab, GridBoard.GridSize * GridBoard.GridSize);
-        InitializeMatchObjects();
     }
 
     protected override void GetSetup(MatchObject obj)
@@ -30,21 +29,25 @@ public class MatchObjectSpawner : PoolerBase<MatchObject>
 
     private void OnEnable()
     {
-        EventBus.OnBlastObjects += EventBus_OnBlastObject;
+        EventBus.OnBlastObject += EventBus_OnBlastObject;
+        EventBus.OnLevelStart += EventBus_OnLevelStart;
     }
 
     private void OnDisable()
     {
-        EventBus.OnBlastObjects -= EventBus_OnBlastObject;
+        EventBus.OnBlastObject -= EventBus_OnBlastObject;
+        EventBus.OnLevelStart -= EventBus_OnLevelStart;
     }
 
-    private void EventBus_OnBlastObject(List<GridCoordinates> gridCoordinatesList)
+
+    private void EventBus_OnLevelStart()
     {
-        foreach (var gridCoordinates in gridCoordinatesList)
-        {
-            var blastObject = _gridBoard.GetMatchObjectFromCoordinates(gridCoordinates);
-            Release(blastObject);
-        }
+        InitializeMatchObjects();
+    }
+
+    private void EventBus_OnBlastObject(MatchObject blastObject)
+    {
+        Release(blastObject);
     }
 
     public async Task GenerateAndPlaceObjectsAfterBlast(Dictionary<int,int> columnBlastDictionary)

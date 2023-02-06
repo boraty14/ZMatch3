@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class InputHandler : MonoBehaviour
@@ -7,6 +8,31 @@ public class InputHandler : MonoBehaviour
     private MatchObject _firstMatchObject;
     private GridBoard _gridBoard;
     private bool _isSwapping;
+    private bool _isPlaying;
+
+    private void OnEnable()
+    {
+        EventBus.OnLevelEnd += EventBus_OnLevelEnd;
+        EventBus.OnLevelStart += EventBus_OnLevelStart;
+    }
+
+    private void OnDisable()
+    {
+        EventBus.OnLevelEnd -= EventBus_OnLevelEnd;
+        EventBus.OnLevelStart -= EventBus_OnLevelStart;
+    }
+
+    private void EventBus_OnLevelStart()
+    {
+        _isSwapping = false;
+        _isPlaying = true;
+        _firstMatchObject = null;
+    }
+    
+    private void EventBus_OnLevelEnd()
+    {
+        _isPlaying = false;
+    }
 
     public void Initialize(GridBoard gridBoard)
     {
@@ -15,7 +41,7 @@ public class InputHandler : MonoBehaviour
 
     private void Update()
     {
-        if(_isSwapping) return;
+        if(_isSwapping || !_isPlaying) return;
         
         var isJustPressed = Input.GetMouseButtonDown(0);
         var isPressing = Input.GetMouseButton(0);

@@ -4,5 +4,7 @@ using UnityEngine;
 
 public class EventBus : MonoBehaviour
 {
-    public static Action<List<GridCoordinates>> OnBlastObjects;
+    public static Action<MatchObject> OnBlastObject;
+    public static Action OnLevelStart;
+    public static Action OnLevelEnd;
 }
