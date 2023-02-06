@@ -21,12 +21,19 @@ public class ScoreHandler : MonoBehaviour
     {
         EventBus.OnLevelStart += EventBus_OnLevelStart;
         EventBus.OnLevelEnd += EventBus_OnLevelEnd;
+        EventBus.OnBlastObject += EventBus_OnBlastObject;
     }
 
     private void OnDisable()
     {
         EventBus.OnLevelStart -= EventBus_OnLevelStart;
         EventBus.OnLevelEnd -= EventBus_OnLevelEnd;
+        EventBus.OnBlastObject -= EventBus_OnBlastObject;
+    }
+
+    private void EventBus_OnBlastObject(MatchObject obj)
+    {
+        CurrentScore++;
     }
 
     private void EventBus_OnLevelStart()

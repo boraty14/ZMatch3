@@ -9,7 +9,7 @@ public class TimeCounter : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _timerText;
     [SerializeField] private Image _timeImage;
     [SerializeField] private Image _fadeImage;
-    private const float StartingTime = 6f;
+    private const float StartingTime = 60f;
     private float _currentTimer;
     private bool _isPlaying;
 

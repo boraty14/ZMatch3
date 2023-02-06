@@ -37,12 +37,11 @@ public class MatchObject : MonoBehaviour
     private void OnDisable()
     {
         EventBus.OnLevelEnd -= EventBus_OnLevelEnd;
-        
     }
 
     private void EventBus_OnLevelEnd()
     {
-        EventBus.OnBlastObject?.Invoke(this);
+        EventBus.OnReleaseObject?.Invoke(this);
     }
 
     private float GetFallDuration(Vector3 targetPosition) =>

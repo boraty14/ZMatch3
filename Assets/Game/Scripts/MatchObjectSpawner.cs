@@ -30,6 +30,7 @@ public class MatchObjectSpawner : PoolerBase<MatchObject>
     private void OnEnable()
     {
         EventBus.OnBlastObject += EventBus_OnBlastObject;
+        EventBus.OnReleaseObject += EventBus_OnReleaseObject;
         EventBus.OnLevelStart += EventBus_OnLevelStart;
     }
 
@@ -37,6 +38,12 @@ public class MatchObjectSpawner : PoolerBase<MatchObject>
     {
         EventBus.OnBlastObject -= EventBus_OnBlastObject;
         EventBus.OnLevelStart -= EventBus_OnLevelStart;
+        EventBus.OnReleaseObject -= EventBus_OnReleaseObject;
+    }
+
+    private void EventBus_OnReleaseObject(MatchObject obj)
+    {
+        Release(obj);
     }
 
 
