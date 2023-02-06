@@ -10,6 +10,7 @@ public class GameInitializer : MonoBehaviour
     
     private void Start()
     {
+        Application.targetFrameRate = 60;
         var gridBoard = new GridBoard(_matchObjectSpawner);
         _inputHandler.Initialize(gridBoard);
         _matchObjectSpawner.Initialize(gridBoard);
